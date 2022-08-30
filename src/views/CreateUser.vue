@@ -15,6 +15,7 @@
 import { defineComponent } from 'vue';
 import { useRouter } from 'vue-router';
 import { useToast } from 'vue-toastification';
+import { AxiosError } from 'axios';
 import axios from '@/utils/axios';
 import Container from '@/components/atoms/Container.vue';
 import Title from '@/components/atoms/Title.vue';
@@ -34,6 +35,15 @@ export default defineComponent({
       router.push('/');
     }
 
+    function processEditError(error: Error) {
+      if (error instanceof AxiosError && error.response?.status === 400) {
+        toast.error('Deixe todos os campos preenchidos, e o email deve estar num formato de email');
+        return;
+      }
+
+      toast.error('Não foi possível criar este usuário');
+    }
+
     async function createUser(data: Record<string, string>) {
       try {
         await axios
@@ -42,7 +52,7 @@ export default defineComponent({
         toast.success('Usuário criado com sucesso');
         backToList();
       } catch (err) {
-        toast.error('Não foi possivel criar o usuário, tente novamente mais tarde');
+        processEditError(err as Error);
       }
     }
 
